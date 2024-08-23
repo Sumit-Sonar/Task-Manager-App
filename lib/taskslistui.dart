@@ -2,67 +2,149 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_manager_app/provider.dart';
 
-class TakskListUI extends StatefulWidget {
-  const TakskListUI({super.key});
+class TaskListUI extends StatefulWidget {
+  const TaskListUI({super.key});
 
   @override
-  State<TakskListUI> createState() => _TakskListUIState();
+  State<TaskListUI> createState() => _TaskListUIState();
 }
 
-class _TakskListUIState extends State<TakskListUI> {
+class _TaskListUIState extends State<TaskListUI> {
   @override
   Widget build(BuildContext context) {
-    final MaterialStateProperty<Icon?> thumbIcon =
-        MaterialStateProperty.resolveWith<Icon?>(
-      (Set<MaterialState> states) {
-        if (states.contains(MaterialState.selected)) {
-          return const Icon(Icons.check);
-        }
-        return const Icon(Icons.close);
-      },
-    );
     final provider = Provider.of<TaskProvider>(context);
     final tasks = provider.tasks;
 
+
+    void showDeleteDialog(
+        BuildContext context, TaskProvider provider, String taskId) {
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(
+                "Delete Task",
+                style: TextStyle(
+                  color: Colors.redAccent,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              content: Text("Are you sure you want to delete this task?"),
+              actions: [
+                TextButton(
+                  child: Text("Cancel", style: TextStyle(color: Colors.grey)),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: Text("Yes", style: TextStyle(color: Colors.redAccent)),
+                  onPressed: () {
+                    provider.deleteTask(taskId);
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          });
+    }
+
     return Scaffold(
+      backgroundColor: const Color(0xFFFFFFF),
       body: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Container(
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          decoration: BoxDecoration(
-              color: Color(0xFFffeaa7),
-              borderRadius: BorderRadius.circular(12)),
-          child: ListView.builder(
-              itemCount: tasks.length,
-              itemBuilder: ((context, index) {
-                final task = tasks[index];
-                return ListTile(
-                  title: Text(task.title),
-                  subtitle: Text(task.description),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Switch(
-                        thumbIcon: thumbIcon,
-                        value: task.isCompleted,
-                        onChanged: (bool value) {
-                          setState(() {
-                            provider.isTaskComplete(task.id);
-                          });
-                        },
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Expanded(
+              child: tasks.isEmpty
+                  ? Center(
+                      child: Text(
+                        'No tasks available. Add a new task!',
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
                       ),
-                      IconButton(
-                        icon: Icon(Icons.delete),
-                        color: Colors.red,
-                        onPressed: () {
-                          provider.deleteTask(task.id);
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              })),
+                    )
+                  : ListView.builder(
+                      itemCount: tasks.length,
+                      itemBuilder: (context, index) {
+                        final task = tasks[index];
+                        return Card(
+                          color: Colors.white,
+                          margin: const EdgeInsets.only(bottom: 10),
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 16),
+                            title: Text(
+                              task.title,
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: task.isCompleted
+                                      ? Colors.grey
+                                      : Colors.black87,
+                                  decoration: task.isCompleted
+                                      ? TextDecoration.lineThrough
+                                      : null),
+                            ),
+                            subtitle: Padding(
+                              padding: const EdgeInsets.only(top: 4.0),
+                              child: Text(
+                                task.description,
+                                style: TextStyle(
+                                    color: Colors.grey.shade600, fontSize: 14),
+                              ),
+                            ),
+                            // to take up the minimum width
+                            trailing: IntrinsicWidth( 
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Switch(
+                                    activeColor: Colors.teal,
+                                    inactiveTrackColor: Colors.grey.shade300,
+                                    value: task.isCompleted,
+                                    onChanged: (bool value) {
+                                      setState(() {
+                                        provider.isTaskComplete(task.id);
+                                        provider.isTaskDone(task.id, value);
+                                      });
+                                    },
+                                  ),
+                                  SizedBox(width: 8),
+                                  // Text indicating completion status
+                                  AnimatedOpacity(
+                                    opacity: task.isDone ? 1.0 : 0.0,
+                                    duration: Duration(milliseconds: 300),
+                                    child: Text(
+                                      'Done',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.teal,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+                                  IconButton(
+                                    icon: Icon(Icons.delete_outline),
+                                    color: Colors.redAccent,
+                                    onPressed: () {
+                                      showDeleteDialog(
+                                          context, provider, task.id);
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
         ),
       ),
     );

@@ -30,11 +30,13 @@ class _MyAppState extends State<MyApp> {
   }
 
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    TaskProvider().loadTasks();
-  }
+void initState() {
+  super.initState();
+  // Load tasks using the TaskProvider from the context
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    Provider.of<TaskProvider>(context, listen: false).loadTasks();
+  });
+}
 
   // This widget is the root of your application.
   @override
@@ -43,15 +45,22 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: const Text("Task Manager App"),
+          backgroundColor: const Color(0xFFb1decf),
+          title: const Text(
+            "Task Manager",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
         ),
-        backgroundColor: const Color(0xFFFEDBD0),
+        backgroundColor: const Color(0xFFb1decf),
         body: IndexedStack(
           index: selectedIndex,
-          children: const <Widget>[TakskListUI(), TasksEditUI()],
+          children: const <Widget>[TaskListUI(), TasksEditUI()],
         ),
         bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Colors.white,
+          // backgroundColor: const Color(0xFFb1decf),
+          // Set the background color of the entire BottomNavigationBar
+          selectedItemColor: Colors.black, // Color for the selected item
+          unselectedItemColor: Colors.grey,
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(
@@ -61,15 +70,16 @@ class _MyAppState extends State<MyApp> {
               label: 'Tasks',
             ),
             BottomNavigationBarItem(
+                backgroundColor: const Color(0xFFb1decf),
                 icon: Icon(
                   Icons.edit,
                   color: Colors.black,
                 ),
-                label: 'Edit')
+                label: 'Add')
           ],
           currentIndex: selectedIndex,
           onTap: onTapIndexed,
-          selectedItemColor: Colors.black,
+          // selectedItemColor: Colors.black,
         ),
       ),
     );

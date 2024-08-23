@@ -8,9 +8,6 @@ class TaskProvider with ChangeNotifier {
 
   List<Task> get tasks => _tasks;
 
-  TaskProvider() {
-    loadTasks();
-  }
 
   void loadTasks() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
@@ -45,7 +42,7 @@ class TaskProvider with ChangeNotifier {
     }
   }
 
-   deleteTask(String id) {
+  deleteTask(String id) {
     _tasks.removeWhere((task) => task.id == id);
     saveTasks();
     notifyListeners();
@@ -58,5 +55,11 @@ class TaskProvider with ChangeNotifier {
       saveTasks();
       notifyListeners();
     }
+  }
+
+  void isTaskDone(String id, bool isDone) {
+    final task = _tasks.firstWhere((task) => task.id == id);
+    task.isDone = isDone;
+    notifyListeners();
   }
 }
