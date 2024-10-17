@@ -2,16 +2,19 @@ class Task {
   String id;
   String title;
   String description;
-  bool isCompleted;
-  bool isDone;
+  String? priorities;
+  String? categories;
+  String? dueDate;
 
   Task({
     required this.id,
     required this.title,
     required this.description,
-    this.isCompleted = false,
-    this.isDone = false
+    this.priorities,
+    this.categories,
+    this.dueDate,
   });
+
 // Convert a Task into a Map (for JSON serialization)
 
   Map<String, dynamic> toJson() {
@@ -19,20 +22,22 @@ class Task {
       'id': id,
       'title': title,
       'description': description,
-      'isCompleted': isCompleted,
-      'isDone': isDone
+      'priorities': priorities,
+      'category': categories,
+      'dueDate': dueDate,
     };
   }
 
   // Convert a Map (from JSON) into a Task
-
+//  rather than always creating a new instance of the class.
   factory Task.fromJson(Map<String, dynamic> json) {
     return Task(
       id: json['id'],
       title: json['title'],
       description: json['description'],
-      isCompleted: json['isCompleted'],
-      isDone: json['isDone']
+      priorities: json['priorities'],
+      categories: json['categories'],
+      dueDate: json['dueDate'],
     );
   }
 }
